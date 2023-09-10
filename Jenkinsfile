@@ -15,10 +15,13 @@ pipeline {
 
     stage("Test") {
       agent {
-          docker {
+        docker {
             image 'python:3.11.5-slim-bullseye'
             args '-u 0:0 -v /tmp:/root/.cache'
-          }
+        }
+      }
+      steps {
+        echo "Testing image"
       }
       // steps {
       //   sh "pip install poetry"
