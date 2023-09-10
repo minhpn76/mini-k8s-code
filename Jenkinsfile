@@ -7,12 +7,6 @@ pipeline {
   }
 
   stages {
-    stage('Clone repository') {
-      steps {
-        checkout scm
-      }
-    }
-
     stage("Test") {
       agent {
         docker {
