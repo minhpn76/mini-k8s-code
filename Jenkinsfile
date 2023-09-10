@@ -1,28 +1,64 @@
-node {
-    def app
+pipeline {
 
+  agent none
+
+  environment {
+    DOCKER_IMAGE = "minhpn76/mini-k8s-code"
+  }
+
+  stages {
     stage('Clone repository') {
-        checkout scm
+      checkout scm
     }
 
-    stage('Build image') {
-      app = docker.build("minhpn/k8s-code")
+    stage("Test") {
+      agent {
+          docker {
+            image 'python:3.11.5-slim-bullseye'
+            args '-u 0:0 -v /tmp:/root/.cache'
+          }
+      }
+      // steps {
+      //   sh "pip install poetry"
+      //   sh "poetry install"
+      //   sh "poetry run pytest"
+      // }
     }
 
-    stage('Test image') {
-        app.inside {
-            sh 'echo "Tests passed"'
+    stage("Build image") {
+      agent { node {label 'master'}}
+      environment {
+        DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
+      }
+      steps {
+        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
+        sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+        sh "docker image ls | grep ${DOCKER_IMAGE}"
+        withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+            sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            sh "docker push ${DOCKER_IMAGE}:latest"
         }
+
+        //clean to save disk
+        sh "docker image rm ${DOCKER_IMAGE}:${DOCKER_TAG}"
+        sh "docker image rm ${DOCKER_IMAGE}:latest"
+      }
     }
 
-    stage('Push image') {
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            app.push("${env.BUILD_NUMBER}")
-        }
+      
+    // stage('Trigger ManifestUpdate') {
+    //     echo "Triggering mini k8s mainifest"
+    //     build job: 'mini-k8s-mainfest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+    // }
+  }
+
+  post {
+    success {
+      echo "SUCCESSFUL"
     }
-    
-    stage('Trigger ManifestUpdate') {
-        echo "Triggering mini k8s mainifest"
-        build job: 'mini-k8s-mainfest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+    failure {
+      echo "FAILED"
     }
+  }
 }
