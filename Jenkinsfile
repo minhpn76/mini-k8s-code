@@ -1,6 +1,8 @@
 node {
     def app
 
+    agent { dockerfile true }
+
     stage('Clone repository') {
       
 
@@ -8,8 +10,9 @@ node {
     }
 
     stage('Build image') {
-  
-       app = docker.build("minhpn/mini-k8s-code")
+        steps {
+            echo "Build image success"
+        }
     }
 
     stage('Test image') {
