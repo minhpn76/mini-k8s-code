@@ -3,7 +3,7 @@ pipeline {
   agent none
 
   environment {
-    DOCKER_IMAGE = "mini-k8s-code"
+    DOCKER_IMAGE = "ghcr.io/minhpn76/mini-k8s-code"
   }
 
   stages {
@@ -35,8 +35,8 @@ pipeline {
       }
       steps {
    
-        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-            sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
+        withCredentials([usernamePassword(credentialsId: 'ghrc', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            sh 'echo $DOCKER_PASSWORD | docker login ghcr.io -u $DOCKER_USERNAME --password-stdin'
         }
 
         sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
