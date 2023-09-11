@@ -27,7 +27,7 @@ pipeline {
     stage("Build image") {
       agent {
         node {
-            label 'master'
+            label 'built-in'
         }
       }
       environment {
