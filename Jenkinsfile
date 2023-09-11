@@ -3,7 +3,7 @@ pipeline {
   agent none
 
   environment {
-    DOCKER_IMAGE = "minhpn76/mini-k8s-code"
+    DOCKER_IMAGE = "mini-k8s-code"
   }
 
   stages {
@@ -40,7 +40,7 @@ pipeline {
         }
 
         sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
-        sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+        sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG}"
         script {
             if (GIT_BRANCH ==~ /.*main.*/) {
                 sh "docker tag ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
