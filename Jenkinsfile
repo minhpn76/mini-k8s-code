@@ -44,7 +44,7 @@ pipeline {
         script {
             if (GIT_BRANCH ==~ /.*main.*/) {
                 sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-                sh "docker push ${DOCKER_IMAGE}:latest"
+                sh "docker push ${DOCKER_USERNAME}/${DOCKER_IMAGE}:latest"
             }
         }
         //clean to save disk
