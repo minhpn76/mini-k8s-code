@@ -39,7 +39,7 @@ pipeline {
             sh 'echo $DOCKER_PASSWORD | docker login ghcr.io -u $DOCKER_USERNAME --password-stdin'
         }
 
-        sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
+        sh "docker build --platform linux/amd64 . -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
         sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
         script {
             if (GIT_BRANCH ==~ /.*main.*/) {
